@@ -1,0 +1,139 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+// Constants
+const int NUM_TRIPS = 4;
+const int NUM_COACHES = 6;
+const int SEATS_PER_COACH = 80;
+const double TICKET_PRICE = 25.0;
+
+// Data structures to track passengers and money for each train journey
+std::vector<int> passengersUp(NUM_TRIPS, 0);
+std::vector<int> passengersDown(NUM_TRIPS, 0);
+std::vector<double> revenueUp(NUM_TRIPS, 0.0);
+std::vector<double> revenueDown(NUM_TRIPS, 0.0);
+
+// Train arrival and departure times
+
+
+// Function to calculate the cost of a ticket
+double calculateTicketCost(int passengers) {
+    double totalCost = 0.0;
+    while (passengers > 0) {
+        int groupSize = std::min(passengers, 10);  // Group size (up to 10)
+        double groupDiscount = (groupSize == 10) ? 0.1 : 0.0;  // 10% discount for every 10 passengers
+        double ticketPrice = TICKET_PRICE * (1.0 - groupDiscount);
+        totalCost += groupSize * ticketPrice;
+        passengers -= groupSize;
+    }
+    return totalCost;
+}
+
+int main() {
+     std::cout<<"%%%%%%%%%%%%%%% WELCOME TO PAKISTAN ONLINE TRAIN BOOKING %%%%%%%%%%%%%%%%"<<std::endl;
+    std::cout<<"******* train trip timing for day ***********  "<<std::endl;
+
+std::cout<<"  departure(UP) - arrival(DOWN) "<<std::endl;
+std::cout<<"1  -   09:00    -  10:00"<<std::endl;
+std::cout<<"2  -   11:00    -  12:00"<<std::endl;
+std::cout<<"3  -   13:00    -  14:00"<<std::endl;
+std::cout<<"4  -   15:00    -  16:00"<<std::endl;
+
+std::cout<<"*************************************************************************************************"<<std::endl;
+
+
+    // Initialize available seats for each train
+    std::vector<int> availableSeatsUp(NUM_TRIPS, NUM_COACHES * SEATS_PER_COACH);
+    std::vector<int> availableSeatsDown(NUM_TRIPS, NUM_COACHES * SEATS_PER_COACH);
+
+    // Variables to track the total number of passengers and total revenue for the day
+    int totalPassengers = 0;
+    double totalRevenue = 0.0;
+
+    // Loop for each passenger
+    for (int passenger = 1; passenger <= NUM_TRIPS * 2; ++passenger) {
+        std::cout<<"IF YOU BOOK MORE THAN 10 SEAT YOU GET 10% DISCOUNT"<<std::endl;
+        std::cout << "Passenger " << passenger << ": " << std::endl;
+
+        int preferredTrip;
+        std::cout << "Choose your preferred trip CODE  (1 to 4):                              ";
+        std::cin >> preferredTrip;
+
+        if (preferredTrip < 1 || preferredTrip > NUM_TRIPS) {
+            std::cout << "Invalid trip choice. Please choose a trip between 1 and 4." << std::endl;
+            continue;
+        }
+
+        int passengersUpTrip, passengersDownTrip;
+        std::cout << "Enter the number of passengers for the journey up:                      ";
+        std::cin >> passengersUpTrip;
+        std::cout << "Enter the number of passengers for the journey down:                    ";
+        std::cin >> passengersDownTrip;
+
+        // Check if there are enough seats for the journey up and down
+        if (passengersUpTrip <= availableSeatsUp[preferredTrip - 1] && passengersDownTrip <= availableSeatsDown[preferredTrip - 1]) {
+            double ticketCostUp = calculateTicketCost(passengersUpTrip);
+            double ticketCostDown = calculateTicketCost(passengersDownTrip);
+            double totalCost = ticketCostUp + ticketCostDown;
+
+            // Update available seats
+            availableSeatsUp[preferredTrip - 1] -= passengersUpTrip;
+            availableSeatsDown[preferredTrip - 1] -= passengersDownTrip;
+
+            // Update passenger and revenue data
+            passengersUp[preferredTrip - 1] += passengersUpTrip;
+            passengersDown[preferredTrip - 1] += passengersDownTrip;
+            revenueUp[preferredTrip - 1] += ticketCostUp;
+            revenueDown[preferredTrip - 1] += ticketCostDown;
+
+            // Update the total passengers and revenue for the day
+            totalPassengers += passengersUpTrip + passengersDownTrip;
+            totalRevenue += totalCost;
+
+            // Display a message for the discount
+            if (passengersUpTrip >= 10 || passengersDownTrip >= 10) {
+                std::cout << "Congratulations! You received a 10% group discount." << std::endl;
+
+            }
+
+            std::cout << "Total cost: $                                                           " << totalCost << std::endl;
+             std::cout << "**************************************************************************************************"<<std::endl;
+
+            // Check if the train is full
+            if (availableSeatsUp[preferredTrip - 1] == 0 && availableSeatsDown[preferredTrip - 1] == 0) {
+                std::cout << "Train is now closed for Trip " << preferredTrip << "." << std::endl;
+            }
+        } else {
+            std::cout << "Not enough available seats for the requested journey. Please choose a different trip." << std::endl;
+        }
+    }
+
+    // Find the train journey with the most passengers
+    int maxPassengers = 0;
+    int maxPassengersTrip = -1;
+    for (int trip = 0; trip < NUM_TRIPS; ++trip) {
+        if (passengersUp[trip] + passengersDown[trip] > maxPassengers) {
+            maxPassengers = passengersUp[trip] + passengersDown[trip];
+            maxPassengersTrip = trip;
+        }
+    }
+
+    // Display end-of-day statistics
+    std::cout << "End of the day statistics:" << std::endl;
+    for (int trip = 0; trip < NUM_TRIPS; ++trip) {
+        std::cout << "Trip " << trip + 1 << " - Passengers: " << passengersUp[trip] + passengersDown[trip] << ", Revenue: $" << revenueUp[trip] + revenueDown[trip] << std::endl;
+    }
+    std::cout << "Total Passengers for the day: " << totalPassengers << std::endl;
+    std::cout << "Total Revenue for the day: $" << totalRevenue << std::endl;
+
+    if (maxPassengersTrip != -1) {
+        std::cout << "Train journey with the most passengers today: Trip " << maxPassengersTrip + 1 << std::endl;
+    }
+
+    // Display train arrival and departure times
+
+
+    return 0;
+}
